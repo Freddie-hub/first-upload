@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .choices {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .choice {
+      font-size: 1rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #4caf50; /* Green */
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    
+    .choice:hover {
+      background-color: #45a049; /* Darker Green */
+    }
+
+    #autoplayBtn {
+      font-size: 1rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #f44336; /* Red */
+      color: white;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    #autoplayBtn:hover {
+      background-color: #d32f2f; /* Darker Red */
+    }
+
+    #resetBtn {
+      font-size: 1rem;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #2196F3; /* Blue */
+      color: white;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    #resetBtn:hover {
+      background-color: #1976D2; /* Darker Blue */
+    }
+    
+    #result {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rock Paper Scissors</h1>
+    <div class="choices">
+      <button class="choice" onclick="startGame('rock')">Rock</button>
+      <button class="choice" onclick="startGame('paper')">Paper</button>
+      <button class="choice" onclick="startGame('scissors')">Scissors</button>
+    </div>
+    <p id="result"></p>
+    <button id="autoplayBtn" onclick="toggleAutoplay()">Autoplay</button>
+    <p>Wins: <span id="wins">0</span>, Ties: <span id="ties">0</span>, Losses: <span id="losses">0</span></p>
+    <button id="resetBtn" onclick="resetScore()">Reset Score</button>
+  </div>
+  <script>
+    // Function to generate the computer's choice
+    function computerChoice() {
+      const choices = ["rock", "paper", "scissors"];
+      const randomIndex = Math.floor(Math.random() * 3);
+      return choices[randomIndex];
+    }
+    
+    // Function to determine the winner
+    function determineWinner(userChoice, computerChoice) {
+      if (userChoice === computerChoice) {
+        return "It's a tie!";
+      } else if (
+        (userChoice === "rock" && computerChoice === "scissors") ||
+        (userChoice === "paper" && computerChoice === "rock") ||
+        (userChoice === "scissors" && computerChoice === "paper")
+      ) {
+        return "You win!";
+      } else {
+        return "Computer wins!";
+      }
+    }
+
+    // Function to update win, tie, and loss counts and display them
+    function updateCounts(wins, ties, losses) {
+      document.getElementById("wins").textContent = wins;
+      document.getElementById("ties").textContent = ties;
+      document.getElementById("losses").textContent = losses;
+    }
+
+    // Function to get wins, ties, and losses from local storage or set them to 0
+    function getResultsFromLocalStorage() {
+      const wins = localStorage.getItem("wins") || 0;
+      const ties = localStorage.getItem("ties") || 0;
+      const losses = localStorage.getItem("losses") || 0;
+      updateCounts(wins, ties, losses);
+      return { wins: parseInt(wins), ties: parseInt(ties), losses: parseInt(losses) };
+    }
+
+    // Function to reset the score
+    function resetScore() {
+      localStorage.setItem("wins", 0);
+      localStorage.setItem("ties", 0);
+      localStorage.setItem("losses", 0);
+      updateCounts(0, 0, 0);
+    }
+
+    // Function to start the game with autoplay
+    function startGame(userChoice) {
+      const computer = computerChoice();
+      const result = determineWinner(userChoice, computer);
+      document.getElementById("result").innerText = `You chose ${userChoice}. Computer chose ${computer}. ${result}`;
+
+      // Update win, tie, and loss counts and store them in local storage
+      const { wins, ties, losses } = getResultsFromLocalStorage();
+      if (result === "You win!") {
+        localStorage.setItem("wins", wins + 1);
+        updateCounts(wins + 1, ties, losses);
+      } else if (result === "It's a tie!") {
+        localStorage.setItem("ties", ties + 1);
+        updateCounts(wins, ties + 1, losses);
+      } else {
+        localStorage.setItem("losses", losses + 1);
+        updateCounts(wins, ties, losses + 1);
+      }
+    }
+    
+    let autoplayInterval;
+    
+    // Function to toggle autoplay
+    function toggleAutoplay() {
+      const autoplayBtn = document.getElementById("autoplayBtn");
+      if (autoplayInterval) {
+        clearInterval(autoplayInterval);
+        autoplayBtn.textContent = "Autoplay";
+        autoplayInterval = null;
+      } else {
+        autoplayBtn.textContent = "Stop Autoplay";
+        autoplayInterval = setInterval(() => {
+          const choices = ["rock", "paper", "scissors"];
+          const randomIndex = Math.floor(Math.random() * 3);
+          const computer = choices[randomIndex];
+          const userChoice = choices[Math.floor(Math.random() * 3)];
+          const result = determineWinner(userChoice, computer);
+          document.getElementById("result").innerText = `You chose ${userChoice}. Computer chose ${computer}. ${result}`;
+          // Update win, tie, and loss counts and store them in local storage
+          const { wins, ties, losses } = getResultsFromLocalStorage();
+          if (result === "You win!") {
+            localStorage.setItem("wins", wins + 1);
+            updateCounts(wins + 1, ties, losses);
+          } else if (result === "It's a tie!") {
+            localStorage.setItem("ties", ties + 1);
+            updateCounts(wins, ties + 1, losses);
+          } else {
+            localStorage.setItem("losses", losses + 1);
+            updateCounts(wins, ties, losses + 1);
+          }
+        }, 1500); // Delay of 1.5 seconds (adjust as desired)
+      }
+    }
+
+    // Get the initial results from local storage when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+      getResultsFromLocalStorage();
+    });
+  </script>
+</body>
+</html>
